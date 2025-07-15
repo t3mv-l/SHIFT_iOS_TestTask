@@ -10,12 +10,15 @@ import UIKit
 class RegistrationViewController: UIViewController {
     private let nameTextField = UITextField()
     private let surnameTextField = UITextField()
+    private let label = UILabel()
+    private let datePicker = UIDatePicker()
     private let passwordTextField = UITextField()
     private let registerButton = UIButton()
     private let errorLabel = UILabel()
     
     override func viewDidLoad() {
         view.backgroundColor = .systemBackground
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "Назад", style: .plain, target: nil, action: nil)
         super.viewDidLoad()
         setupNameFields()
         setupBirthDate()
@@ -33,8 +36,8 @@ class RegistrationViewController: UIViewController {
         surnameTextField.addTarget(self, action: #selector(textFieldsChanged), for: .editingChanged)
         
         NSLayoutConstraint.activate([
-            nameTextField.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -120),
-            surnameTextField.centerYAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 40)
+            nameTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
+            surnameTextField.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 20)
         ])
     }
     
@@ -49,6 +52,10 @@ class RegistrationViewController: UIViewController {
         
         textField.translatesAutoresizingMaskIntoConstraints = false
         
+        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: 40))
+        textField.leftView = paddingView
+        textField.leftViewMode = .always
+        
         NSLayoutConstraint.activate([
             textField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             textField.widthAnchor.constraint(equalToConstant: 250),
@@ -57,23 +64,21 @@ class RegistrationViewController: UIViewController {
     }
     
     func setupBirthDate() {
-        let label = UILabel()
         label.text = "Дата рождения:"
         label.font = .systemFont(ofSize: 17, weight: .semibold)
         label.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(label)
         
-        let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
         datePicker.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(datePicker)
                 
         NSLayoutConstraint.activate([
+            label.topAnchor.constraint(equalTo: surnameTextField.bottomAnchor, constant: 25),
             label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 75),
-            label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
-            datePicker.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -75),
-            datePicker.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            datePicker.topAnchor.constraint(equalTo: surnameTextField.bottomAnchor, constant: 20),
+            datePicker.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -75)
         ])
     }
     
@@ -81,10 +86,8 @@ class RegistrationViewController: UIViewController {
         setupNameTextField(for: passwordTextField, placeholder: "Введите пароль...")
         
         passwordTextField.isSecureTextEntry = true
-        
         passwordTextField.addTarget(self, action: #selector(textFieldsChanged), for: .editingChanged)
-        
-        passwordTextField.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 60).isActive = true
+        passwordTextField.topAnchor.constraint(equalTo: datePicker.bottomAnchor, constant: 20).isActive = true
     }
     
     func setupRegistrationButton() {
@@ -97,8 +100,8 @@ class RegistrationViewController: UIViewController {
         view.addSubview(registerButton)
         
         NSLayoutConstraint.activate([
+            registerButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 30),
             registerButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            registerButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 120),
             registerButton.widthAnchor.constraint(equalToConstant: 250),
             registerButton.heightAnchor.constraint(equalToConstant: 40)
         ])
@@ -114,8 +117,8 @@ class RegistrationViewController: UIViewController {
         view.addSubview(errorLabel)
         
         NSLayoutConstraint.activate([
-            errorLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            errorLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 160)
+            errorLabel.topAnchor.constraint(equalTo: registerButton.bottomAnchor, constant: 16),
+            errorLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }
     
@@ -133,12 +136,16 @@ class RegistrationViewController: UIViewController {
         let isFormFilled = !(nameTextField.text?.isEmpty ?? true) && !(surnameTextField.text?.isEmpty ?? true) && !(passwordTextField.text?.isEmpty ?? true)
         
         if isFormFilled {
+            errorLabel.text = nil
+            UserDefaults.standard.set(nameTextField.text, forKey: "userName")
+            
             let mainViewController = MainViewController()
             self.navigationController?.pushViewController(mainViewController, animated: true)
+            
             nameTextField.text = nil
             surnameTextField.text = nil
+            datePicker.date = Date()
             passwordTextField.text = nil
-            errorLabel.text = nil
             updateRegisterButtonState()
         } else {
             errorLabel.text = "Для входа необходимо заполнить все окна"

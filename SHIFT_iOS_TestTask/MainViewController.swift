@@ -18,16 +18,57 @@ class MainViewController: UIViewController {
     var storeElements: [StoreElement] = []
     
     let tableView = UITableView()
+    let greetingButton = UIButton()
     
     override func viewDidLoad() {
+        super.viewDidLoad()
         view.backgroundColor = .systemBackground
+        
+        setGreetingButton()
+        setTableView()
+        setConstraints()
+        
+        fetchApi()
+    }
+    
+    func setGreetingButton() {
+        greetingButton.setTitle("Приветствие", for: .normal)
+        greetingButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
+        greetingButton.backgroundColor = .systemBlue
+        greetingButton.setTitleColor(.white, for: .normal)
+        greetingButton.layer.cornerRadius = 10
+        greetingButton.addTarget(self, action: #selector(greetingButtonTapped), for: .touchUpInside)
+        greetingButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(greetingButton)
+    }
+    
+    func setTableView() {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        tableView.frame = view.bounds
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
-        fetchApi()
-        super.viewDidLoad()
+    }
+    
+    func setConstraints() {
+        NSLayoutConstraint.activate([
+            greetingButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            greetingButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            greetingButton.widthAnchor.constraint(equalToConstant: 180),
+            greetingButton.heightAnchor.constraint(equalToConstant: 44),
+                        
+            tableView.topAnchor.constraint(equalTo: greetingButton.bottomAnchor, constant: 16),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+    
+    @objc func greetingButtonTapped() {
+        let readUserName = UserDefaults.standard.string(forKey: "userName") ?? "пользователь"
+        let alert = UIAlertController(title: "Приветствие", message: "Здравствуйте, \(readUserName)! Добро пожаловать!", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
     
     func fetchApi() {
