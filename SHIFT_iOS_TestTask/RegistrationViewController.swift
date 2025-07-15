@@ -8,6 +8,11 @@
 import UIKit
 
 class RegistrationViewController: UIViewController {
+    private let nameTextField = UITextField()
+    private let surnameTextField = UITextField()
+    private let passwordTextField = UITextField()
+    private let registerButton = UIButton()
+    private let errorLabel = UILabel()
     
     override func viewDidLoad() {
         view.backgroundColor = .systemBackground
@@ -16,14 +21,16 @@ class RegistrationViewController: UIViewController {
         setupBirthDate()
         setupPassword()
         setupRegistrationButton()
+        setupErrorLabel()
+        updateRegisterButtonState()
     }
     
     func setupNameFields() {
-        let nameTextField = UITextField()
-        let surnameTextField = UITextField()
-        
         setupNameTextField(for: nameTextField, placeholder: "Введите имя...")
         setupNameTextField(for: surnameTextField, placeholder: "Введите фамилию...")
+        
+        nameTextField.addTarget(self, action: #selector(textFieldsChanged), for: .editingChanged)
+        surnameTextField.addTarget(self, action: #selector(textFieldsChanged), for: .editingChanged)
         
         NSLayoutConstraint.activate([
             nameTextField.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -120),
@@ -71,22 +78,22 @@ class RegistrationViewController: UIViewController {
     }
     
     func setupPassword() {
-        let passwordTextField = UITextField()
-        
         setupNameTextField(for: passwordTextField, placeholder: "Введите пароль...")
         
         passwordTextField.isSecureTextEntry = true
+        
+        passwordTextField.addTarget(self, action: #selector(textFieldsChanged), for: .editingChanged)
         
         passwordTextField.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 60).isActive = true
     }
     
     func setupRegistrationButton() {
-        let registerButton = UIButton()
         registerButton.setTitle("Регистрация", for: .normal)
         registerButton.backgroundColor = .systemBlue
         registerButton.layer.cornerRadius = 10
         registerButton.translatesAutoresizingMaskIntoConstraints = false
         registerButton.addTarget(self, action: #selector(registerButtonTapped), for: .touchUpInside)
+        registerButton.addTarget(self, action: #selector(textFieldsChanged), for: .editingChanged)
         view.addSubview(registerButton)
         
         NSLayoutConstraint.activate([
@@ -97,8 +104,44 @@ class RegistrationViewController: UIViewController {
         ])
     }
     
+    func setupErrorLabel() {
+        errorLabel.font = .systemFont(ofSize: 14, weight: .semibold)
+        errorLabel.textColor = .systemRed
+        errorLabel.translatesAutoresizingMaskIntoConstraints = false
+        errorLabel.textAlignment = .center
+        errorLabel.numberOfLines = 0
+        errorLabel.text = nil
+        view.addSubview(errorLabel)
+        
+        NSLayoutConstraint.activate([
+            errorLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            errorLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 160)
+        ])
+    }
+    
+    @objc func textFieldsChanged() {
+        updateRegisterButtonState()
+    }
+    
+    private func updateRegisterButtonState() {
+        let isFormFilled = !(nameTextField.text?.isEmpty ?? true) && !(surnameTextField.text?.isEmpty ?? true) && !(passwordTextField.text?.isEmpty ?? true)
+        //registerButton.isEnabled = isFormFilled
+        registerButton.alpha = isFormFilled ? 1.0 : 0.5
+    }
+    
     @objc func registerButtonTapped() {
-        let mainViewController = MainViewController()
-        self.navigationController?.pushViewController(mainViewController, animated: true)
+        let isFormFilled = !(nameTextField.text?.isEmpty ?? true) && !(surnameTextField.text?.isEmpty ?? true) && !(passwordTextField.text?.isEmpty ?? true)
+        
+        if isFormFilled {
+            let mainViewController = MainViewController()
+            self.navigationController?.pushViewController(mainViewController, animated: true)
+            nameTextField.text = nil
+            surnameTextField.text = nil
+            passwordTextField.text = nil
+            errorLabel.text = nil
+            updateRegisterButtonState()
+        } else {
+            errorLabel.text = "Для входа необходимо заполнить все окна"
+        }
     }
 }
